@@ -52,11 +52,16 @@
     X(void,     glDeleteVertexArrays,     GLsizei n, const GLuint* arrays)                        \
     X(void,     glBindVertexArray,        GLuint array)                                           \
     /*ARB_framebuffer_object*/\
-    X(void,     glGenFramebuffers,     GLsizei n, GLuint* framebuffers)                        \
-    X(void,     glBindFramebuffer,     GLenum target, GLuint framebuffer)                      \
-    X(GLenum,   glCheckFramebufferStatus, GLenum target)                                       \
-    X(void,     glDeleteFramebuffers,  GLsizei n, const GLuint *framebuffers)                  \
-    X(void,     glFramebufferTexture2D, GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level) \
+    X_WITH_FALLBACK(void,     glGenFramebuffers,     GLsizei n, GLuint* framebuffers)             \
+    X_WITH_FALLBACK(void,     glBindFramebuffer,     GLenum target, GLuint framebuffer)           \
+    X_WITH_FALLBACK(GLenum,   glCheckFramebufferStatus, GLenum target)                            \
+    X_WITH_FALLBACK(void,     glDeleteFramebuffers,  GLsizei n, const GLuint *framebuffers)       \
+    X_WITH_FALLBACK(void,     glFramebufferTexture2D, GLenum target, GLenum attachment, GLenum textarget, GLuint texture, GLint level) \
+    X_FALLBACK_FOR(glGenFramebuffersEXT, glGenFramebuffers)                                       \
+    X_FALLBACK_FOR(glBindFramebufferEXT, glBindFramebuffer)                                       \
+    X_FALLBACK_FOR(glCheckFramebufferStatusEXT, glCheckFramebufferStatus)                         \
+    X_FALLBACK_FOR(glDeleteFramebuffersEXT, glDeleteFramebuffers)                                 \
+    X_FALLBACK_FOR(glFramebufferTexture2DEXT, glFramebufferTexture2D)                             \
     /*EXT_framebuffer_blit*/\
     X(void,     glBlitFramebufferEXT,     GLint srcX0, GLint srcY0, GLint srcX1, GLint srcY1, GLint dstX0, GLint dstY0, GLint dstX1, GLint dstY1, GLbitfield mask, GLenum filter) \
     /*ARB_texture_multisample*/\

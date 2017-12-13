@@ -18,7 +18,11 @@ GL_DEBUG_CALLBACK(milton_gl_debug_callback)
 #if defined(_WIN32)
     // OpenGL function prototypes.
     #define X(ret, name, ...) typedef ret WINAPI name##Proc(__VA_ARGS__); name##Proc * name ;
+    #define X_WITH_FALLBACK(ret, name, ...) typedef ret WINAPI name##Proc(__VA_ARGS__); name##Proc * name ;
+    #define X_FALLBACK_FOR(fallback, fallback_for)
         GL_FUNCTIONS
+    #undef X_WITH_FALLBACK
+    #undef X_FALLBACK_FOR
     #undef X
 
     // Declaring glMinSampleShadingARB because we have a different path for loading it.
@@ -113,17 +117,17 @@ bool
 load ()
 {
 #if defined(_WIN32)
-#define GETADDRESS(func, fatal_on_fail) \
+#define GETADDRESS(func, funcname, fatal_on_fail) \
                         { \
-                            func = (decltype(func))wglGetProcAddress(#func); \
+                            func = (decltype(func))wglGetProcAddress(#funcname); \
                             if ( func == NULL && fatal_on_fail )  { \
-                                char* msg = "Could not load function " #func; \
+                                char* msg = "Could not load function " #funcname; \
                                 milton_log(msg);\
                                 milton_die_gracefully(msg); \
                             } \
                         }
 #elif defined(__linux__)
-    #define GETADDRESS(f, e)
+    #define GETADDRESS(f, fn, e)
 
     #if 0
     #define GETADDRESS(func) \
@@ -144,7 +148,7 @@ load ()
     }
     #endif
 #elif defined(__MACH__)
-    #define GETADDRESS(f, e)
+    #define GETADDRESS(f, fn, e)
 
     // ARB_vertex_array_object on macOS not available, but apple extension is.
     #define glGenVertexArrays glGenVertexArraysAPPLE
@@ -153,10 +157,14 @@ load ()
 #endif
 
     // Load
-#define X(ret, name, ...) GETADDRESS(name, /*fatal on fail*/true)
+#define X(ret, name, ...) GETADDRESS(name, name,/*fatal on fail*/true)
+#define X_WITH_FALLBACK(ret, name, ...) GETADDRESS(name, name,/*fatal on fail*/false)
+#define X_FALLBACK_FOR(fallback, fallback_for) if(! fallback_for ) { GETADDRESS(fallback_for, fallback,/*fatal on fail*/true)} /*only supports one fallback for now*/
     GL_FUNCTIONS
+#undef X_FALLBACK_FOR
+#undef X_WITH_FALLBACK
 #undef X
-    GETADDRESS(glMinSampleShadingARB, /*Not fatal on fail*/false)
+    GETADDRESS(glMinSampleShadingARB, glMinSampleShadingARB,/*Not fatal on fail*/false)
 
     bool ok = true;
     // Extension checking.
